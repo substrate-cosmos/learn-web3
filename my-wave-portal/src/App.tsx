@@ -33,7 +33,7 @@ export default function App() {
         const waves = await wavePortalContract.getAllWaves();
 
         // we only need address, timestamp and message in our UI so let's pick those out
-        let wavesCleaned = [];
+        let wavesCleaned: ((prevState: never[]) => never[]) | { address: any; timestamp: Date; message: any; }[] = [];
         waves.forEach((wave) => {
           wavesCleaned.push({
             address: wave.waver,
@@ -171,6 +171,7 @@ export default function App() {
   useEffect(() => {
     checkIfWalletIsConnected();
     getTotalWaves();
+    getAllWaves();
   }, []);
 
   return (
