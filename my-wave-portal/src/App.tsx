@@ -100,8 +100,6 @@ export default function App() {
         console.log("Retrieved total wave count ...", count.toNumber());
 
         // execute the actual wave from your smart contract
-        // todo self message
-        // const waveTxn = await wavePortalContract.wave("This is a message");
         const waveTxn = await wavePortalContract.wave(tweetValue, {
           gasLimit: 300000,
         });
@@ -121,8 +119,6 @@ export default function App() {
       console.log(error);
     }
   };
-
-  // fix bug: need async sambel
 
   const checkIfWalletIsConnected = async () => {
     try {
