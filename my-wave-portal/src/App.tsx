@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/WavePortal.json";
+import {
+  TwitterTimelineEmbed,
+  TwitterHashtagButton,
+} from "react-twitter-embed";
 
 export default function App() {
   // Just a state variable we use to store our user's public wallet.
@@ -10,9 +14,10 @@ export default function App() {
   const [totalWave, setTotalWave] = useState(0);
   const [allWaves, setAllWaves] = useState([]);
   const [tweetValue, setTweetValue] = React.useState("");
+  const [currentHash, setCurrentHash] = useState("");
 
   // create a variable here that references the abi content!
-  const contractAddress = "0xa487bFD3b6B838a82f638Fa31b90a3d1E8232e02";
+  const contractAddress = "0x82C8B5a30F1a5A5d009Df88ff3a7B694b2821309";
 
   const contractABI = abi.abi;
 
@@ -33,7 +38,9 @@ export default function App() {
         const waves = await wavePortalContract.getAllWaves();
 
         // we only need address, timestamp and message in our UI so let's pick those out
-        let wavesCleaned: ((prevState: never[]) => never[]) | { address: any; timestamp: Date; message: any; }[] = [];
+        let wavesCleaned:
+          | ((prevState: never[]) => never[])
+          | { address: any; timestamp: Date; message: any }[] = [];
         waves.forEach((wave) => {
           wavesCleaned.push({
             address: wave.waver,
@@ -107,6 +114,8 @@ export default function App() {
         await waveTxn.wait();
         console.log("Mined -- ", waveTxn.hash);
 
+        setCurrentHash(waveTxn.hash);
+
         count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count ...", count.toNumber());
       } else {
@@ -177,6 +186,13 @@ export default function App() {
   return (
     <div className="mainContainer">
       <div className="dataContainer">
+        <TwitterTimelineEmbed
+          sourceType="profile"
+          screenName="TheLongSnow"
+          options={{ height: 400 }}
+        />
+        <TwitterHashtagButton tag={"drippies"} />
+
         <div className="header">👋 Hey there!</div>
 
         <div className="bio">

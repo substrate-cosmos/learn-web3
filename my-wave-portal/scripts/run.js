@@ -9,9 +9,14 @@ const main = async () => {
   console.log("Contract deployed to: ", waveContract.address);
   console.log("Contract deployed by: ", owner.address);
 
-  // get Contract balance 
-  let contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
-  console.log("Contract balance: ", hre.ethers.utils.formatEther(contractBalance));
+  // get Contract balance
+  let contractBalance = await hre.ethers.provider.getBalance(
+    waveContract.address
+  );
+  console.log(
+    "Contract balance: ",
+    hre.ethers.utils.formatEther(contractBalance)
+  );
 
   let totalWaveAddressCount;
 
@@ -28,8 +33,10 @@ const main = async () => {
   await waveTxn2.wait(); // Wait for the transaction to be mined
 
   contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
-  console.log("Contract balance", hre.ethers.utils.formatEther(contractBalance));
-
+  console.log(
+    "Contract balance",
+    hre.ethers.utils.formatEther(contractBalance)
+  );
 
   let allWaves = await waveContract.getAllWaves();
   console.log(allWaves);
