@@ -12,7 +12,7 @@ export default function App() {
   const [tweetValue, setTweetValue] = React.useState("");
 
   // create a variable here that references the abi content!
-  const contractAddress = "0xe7bd31d3B6A8Fc6974454f510F74D1986Bc625e0";
+  const contractAddress = "0xa487bFD3b6B838a82f638Fa31b90a3d1E8232e02";
 
   const contractABI = abi.abi;
 
