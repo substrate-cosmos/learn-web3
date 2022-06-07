@@ -55,14 +55,14 @@ contract WavePortal {
 
         // We need to make sure the current timestamp is at least 15-minutes bigger than the last timestamp we stored
         require (
-            lastWavedAt[msg.sender] + 15 minutes < block.timestamp, 
-            "Wait 15m"
+            lastWavedAt[msg.sender] + 10 seconds < block.timestamp, 
+            "Wait 10s"
         );
 
         // update the current timestamp we have for the user 
         lastWavedAt[msg.sender] = block.timestamp;
 
-        
+
         totalWaves += 1;
         arrayWavePerson.push(msg.sender);
         console.log("%s waved w/ message %s!", msg.sender, _message);
