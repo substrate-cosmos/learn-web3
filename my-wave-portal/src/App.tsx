@@ -7,11 +7,38 @@ export default function App() {
   // Just a state variable we use to store our user's public wallet.
 
   const [currentAccount, setCurrentAccount] = useState("");
+  const [totalWave, setTotalWave] = useState(0);
 
   // create a variable here that references the abi content!
   const contractAddress = "0x13eF850E396763e95bE5b038C8F04E040eBF7C1A";
 
   const contractABI = abi.abi;
+
+  const getTotalWaves = async () => {
+    try {
+      const {ethereum} = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+
+        // use contractABI
+        const wavePortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+        let count = await wavePortalContract.getTotalWaves();
+        setTotalWave(count.toNumber());
+        console.log(count.toNumber());
+        return count.toNumber();
+      } else {
+        console.log("Ethereum object does't exist!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const wave = async () => {
     try {
@@ -101,6 +128,7 @@ export default function App() {
   // This runs our function when the page loads.
   useEffect(() => {
     checkIfWalletIsConnected();
+    getTotalWaves();
   }, []);
 
   return (
@@ -122,6 +150,7 @@ export default function App() {
             Connect Wallet
           </button>
         )}
+        <div> Total wave: {totalWave} </div>
       </div>
     </div>
   );

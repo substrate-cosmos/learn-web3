@@ -7,25 +7,30 @@ const main = async () => {
     console.log("Contract deployed to: ", waveContract.address);
     console.log("Contract deployed by: ", owner.address);
 
-    let waveCount;
+    
     let totalWaveAddressCount;
-    waveCount = await waveContract.getTotalWaves();
-    totalWaveAddressCount = await waveContract.getTotalArrayWavePerson();
+    
+    // get total wave 
+    let allWaveCount = await waveContract.getTotalWaves();
+    // totalWaveAddressCount = await waveContract.getTotalArrayWavePerson();
+    console.log(allWaveCount.toNumber());
+    // console.log(totalWaveAddressCount);
 
-    let waveTxn = await waveContract.wave();
+    // send a few waves! 
+    let waveTxn = await waveContract.wave("A message!");
+    await waveTxn.wait(); // Wait for the transaction to be mined
 
-    await waveTxn.wait();
-
-    waveCount = await waveContract.getTotalWaves();
-    totalWaveAddressCount = await waveContract.getTotalArrayWavePerson();
+    waveTxn = await waveContract.connect(randomPerson).wave("Another message!");
+    await waveTxn.wait(); // Wait for the transaction to be mined
 
 
-    // anyone wave, this is randomPerson
-    waveTxn = await waveContract.connect(randomPerson).wave();
-    await waveTxn.wait();
+    allWaveCount = await waveContract.getTotalWaves();
+    // totalWaveAddressCount = await waveContract.getTotalArrayWavePerson();
+    console.log(allWaveCount.toNumber());
+    // console.log(totalWaveAddressCount);
 
-    waveCount = await waveContract.getTotalWaves();
-    totalWaveAddressCount = await waveContract.getTotalArrayWavePerson();
+    let allWaves = await waveContract.getAllWaves();
+    console.log(allWaves)
 
 };
 
