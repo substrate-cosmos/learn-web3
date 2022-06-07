@@ -17,24 +17,19 @@ const main = async () => {
 
   // get total wave
   let allWaveCount = await waveContract.getTotalWaves();
-  // totalWaveAddressCount = await waveContract.getTotalArrayWavePerson();
   console.log(allWaveCount.toNumber());
-  // console.log(totalWaveAddressCount);
 
   // send a few waves!
-  let waveTxn = await waveContract.wave("A message!");
-  await waveTxn.wait(); // Wait for the transaction to be mined
+  let waveTxn1 = await waveContract.wave("This is wave #1");
+  await waveTxn1.wait(); // Wait for the transaction to be mined
 
-  waveTxn = await waveContract.connect(randomPerson).wave("Another message!");
-  await waveTxn.wait(); // Wait for the transaction to be mined
+  // send a few waves!
+  let waveTxn2 = await waveContract.wave("This is wave #2");
+  await waveTxn2.wait(); // Wait for the transaction to be mined
 
   contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
   console.log("Contract balance", hre.ethers.utils.formatEther(contractBalance));
 
-  allWaveCount = await waveContract.getTotalWaves();
-  // totalWaveAddressCount = await waveContract.getTotalArrayWavePerson();
-  console.log(allWaveCount.toNumber());
-  // console.log(totalWaveAddressCount);
 
   let allWaves = await waveContract.getAllWaves();
   console.log(allWaves);
