@@ -37,7 +37,7 @@ export default function App() {
         const waves = await wavePortalContract.getAllWaves();
 
         // we only need address, timestamp and message in our UI so let's pick those out
-        const wavesCleaned  = waves.map(wave => {
+        const wavesCleaned = waves.map((wave) => {
           return {
             address: wave.waver,
             timestamp: new Date(wave.timestamp * 1000),
@@ -178,18 +178,18 @@ export default function App() {
     getTotalWaves();
     getAllWaves();
 
-    // can subscribe event 
+    // can subscribe event
     let wavePortalContract;
 
     const onNewWave = (from, timestamp, message) => {
       console.log("NewWave", from, timestamp, message);
-      setAllWaves(prevState => [
+      setAllWaves((prevState) => [
         ...prevState,
         {
           address: from,
           timestamp: new Date(timestamp * 1000),
           message: message,
-        }
+        },
       ]);
     };
 
@@ -197,29 +197,32 @@ export default function App() {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
 
-      wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+      wavePortalContract = new ethers.Contract(
+        contractAddress,
+        contractABI,
+        signer
+      );
       wavePortalContract.on("NewWave", onNewWave);
     }
 
     return () => {
       if (wavePortalContract) {
-        wavePortalContract.off("NewWave",onNewWave);
+        wavePortalContract.off("NewWave", onNewWave);
       }
     };
-    
   }, []);
 
   return (
     <div className="mainContainer">
       <div className="dataContainer">
+        <div className="header">👋 Hey there!</div>
+
         <TwitterTimelineEmbed
           sourceType="profile"
           screenName="TheLongSnow"
           options={{ height: 400 }}
         />
         <TwitterHashtagButton tag={"drippies"} />
-
-        <div className="header">👋 Hey there!</div>
 
         <div className="bio">
           I am farza and I worked on self-driving cars so that's pretty cool
