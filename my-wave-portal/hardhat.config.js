@@ -2,7 +2,6 @@ require("@nomiclabs/hardhat-waffle");
 
 require("dotenv").config();
 
-
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -30,4 +29,5 @@ module.exports = {
   },
 };
 
-// deploy contract 0x13eF850E396763e95bE5b038C8F04E040eBF7C1A
+// first deploy contract 0x13eF850E396763e95bE5b038C8F04E040eBF7C1A
+// second deploy contract 0xe7bd31d3B6A8Fc6974454f510F74D1986Bc625e0

@@ -1,15 +1,25 @@
-# Basic Sample Hardhat Project
+# Wave Web3 Project
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
 
-Try running some of the following tasks:
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+
+## add input box 
+
+1. Create a new state variable like this
+  const [tweetValue, setTweetValue] = React.useState("")
+
+2. Add a textbox if the account is connected using this
+        {
+          currAccount ? (<textarea name="tweetArea"
+            placeholder="type your tweet"
+            type="text"
+            id="tweet"
+            value={tweetValue}
+            onChange={e => setTweetValue(e.target.value)} />) : null
+        }
+
+3. Call the wave function using this text value
+    const waveTxn = await waveportalContract.wave(tweetValue,{gasLimit:300000})
+
+
+Here the onChange function changes the tweetValue state to the new state every time a change is made in the text box. Then once the state is set, you simply have to call Wave with the text.

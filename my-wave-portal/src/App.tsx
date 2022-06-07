@@ -8,15 +8,53 @@ export default function App() {
 
   const [currentAccount, setCurrentAccount] = useState("");
   const [totalWave, setTotalWave] = useState(0);
+  const [allWaves, setAllWaves] = useState([]);
+  const [tweetValue, setTweetValue] = React.useState("");
 
   // create a variable here that references the abi content!
-  const contractAddress = "0x13eF850E396763e95bE5b038C8F04E040eBF7C1A";
+  const contractAddress = "0xe7bd31d3B6A8Fc6974454f510F74D1986Bc625e0";
 
   const contractABI = abi.abi;
 
+  const getAllWaves = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const wavePortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+
+        // call the get all waves method from your smart contract
+        const waves = await wavePortalContract.getAllWaves();
+
+        // we only need address, timestamp and message in our UI so let's pick those out
+        let wavesCleaned = [];
+        waves.forEach((wave) => {
+          wavesCleaned.push({
+            address: wave.waver,
+            timestamp: new Date(wave.timestamp * 1000),
+            message: wave.message,
+          });
+        });
+
+        // store out data in react state
+        setAllWaves(wavesCleaned);
+      } else {
+        console.log("Ethereum object does not exist!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const getTotalWaves = async () => {
     try {
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
@@ -38,7 +76,7 @@ export default function App() {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const wave = async () => {
     try {
@@ -59,7 +97,11 @@ export default function App() {
         console.log("Retrieved total wave count ...", count.toNumber());
 
         // execute the actual wave from your smart contract
-        const waveTxn = await wavePortalContract.wave();
+        // todo self message
+        // const waveTxn = await wavePortalContract.wave("This is a message");
+        const waveTxn = await wavePortalContract.wave(tweetValue, {
+          gasLimit: 300000,
+        });
         console.log("Mining ...", waveTxn.hash);
 
         await waveTxn.wait();
@@ -142,15 +184,44 @@ export default function App() {
         </div>
 
         <button className="waveButton" onClick={wave}>
-          Wave at Me
+          Wave at Me 👋
         </button>
+
+        {currentAccount ? (
+          <textarea
+            name="tweetArea"
+            placeholder="type your tweet"
+            type="text"
+            id="tweet"
+            value={tweetValue}
+            onChange={(e) => setTweetValue(e.target.value)}
+          />
+        ) : null}
 
         {!currentAccount && (
           <button className="waveButton" onClick={connectWallet}>
             Connect Wallet
           </button>
         )}
+
         <div> Total wave: {totalWave} </div>
+
+        {allWaves.map((wave, index) => {
+          return (
+            <div
+              key={index}
+              style={{
+                backgroundColor: "OldLace",
+                marginTop: "16px",
+                padding: "8px",
+              }}
+            >
+              <div>Address: {wave.address}</div>
+              <div>Time: {wave.timestamp.toString()}</div>
+              <div>Message: {wave.message}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
