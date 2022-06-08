@@ -34,3 +34,4 @@ module.exports = {
 // third deploy contract 0xa487bFD3b6B838a82f638Fa31b90a3d1E8232e02
 // four deploy contract 0x82C8B5a30F1a5A5d009Df88ff3a7B694b2821309
 // fifth deploy contract 0x804f308CDe088dfbFB42fDdEC2af446D037C4D7D
+// six deploy contract 0x3Dfb6BDc0C173c8eaF7fa949459eE70bd9080b75
