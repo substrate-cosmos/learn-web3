@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 // Constants
 const TWITTER_HANDLE = "_buildspace";
@@ -8,8 +8,11 @@ const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 export default function App() {
+  // just a state variable we use to store our user's public wallet,
+  // Don't forget to impot useState
+  const [currentAccount, setCurrentAccount] = useState("");
 
-  const checkIfWalletIsConnected = () => {
+  const checkIfWalletIsConnected = async () => {
     // fist make sure we have access to window.ethereum
     const { ethereum } = window;
 
@@ -19,7 +22,42 @@ export default function App() {
     } else {
       console.log("We have the ethereum object", ethereum);
     }
-  }
+
+    // check is we're authorized to access the user's wallet
+    const accounts = await ethereum.request({ method: "eth_accounts" });
+
+    // user can have multiple authorized accounts, we grab the first one if tis there!
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      console.log("Found an authorized account:", account);
+      setCurrentAccount(account);
+    } else {
+      console.log("No authorized account found");
+    }
+  };
+
+  // implement your connect wallet method here
+  const connectWallet = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        console.log("Get MetaMask!");
+        return;
+      } else {
+        // fancy method to request access to account.
+        const accounts = await ethereum.request({
+          method: "eth_requestAccounts",
+        });
+
+        // boom! this should print out public address once we authorized metamask
+        console.log("Connected: ", accounts[0]);
+        setCurrentAccount(accounts[0]);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   // Render Methods
   const renderNotConnectedContainer = () => (
@@ -28,10 +66,11 @@ export default function App() {
     </button>
   );
 
-  // this runs our function when pags load. 
+  // this runs our function when pags load.
   useEffect(() => {
     checkIfWalletIsConnected();
-  },[])
+    connectWallet();
+  }, []);
 
   return (
     <div className="container">
@@ -47,7 +86,13 @@ export default function App() {
           Each unique. Each beautiful. Discover your NFT today.
         </p>
 
-        {renderNotConnectedContainer()}
+        {currentAccount == "" ? (
+          renderNotConnectedContainer()
+        ) : (
+          <button onClick={null} className="cta-button connect-wallet-button">
+            Mint NFT
+          </button>
+        )}
       </main>
 
       <div className="footer-container">
