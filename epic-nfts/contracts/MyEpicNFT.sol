@@ -3,6 +3,7 @@
 pragma solidity ^0.8.1;
 
 // we first import soem OpenZeppelin Contract.
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "hardhat/console.sol";
@@ -18,6 +19,9 @@ contract MyEpicNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+
+    // MAGICAL EVENTS.
+    event NewEpicNFTMinted(address sender, uint256 tokenId);
 
     // This is our SVG code. All we need to change is the word that's displayed. 
     // Everything else stays the same. 
@@ -124,5 +128,7 @@ contract MyEpicNFT is ERC721URIStorage {
         _tokenIds.increment();
         console.log("An NFT w/ ID %s has been minted to %s", newItemId, msg.sender);
 
+        // EMIT MAGICAL EVENTS.
+        emit NewEpicNFTMinted(msg.sender, newItemId);
     }
 }

@@ -26,3 +26,6 @@ module.exports = {
     },
   },
 };
+
+// first deploy contract 0xe3378229E68563Dc3d9584B91Bc128673d8BE5C1
+// second deploy contract 0x58822827319Cee7fD30817Ca5BF5Cd0a09209070

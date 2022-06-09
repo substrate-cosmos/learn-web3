@@ -1,11 +1,17 @@
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
+import { ethers } from "ethers"; 
+import myEpicNft from "./utils/MyEpicNFT.json";
 
 // Constants
 const TWITTER_HANDLE = "_buildspace";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
+
+// I moved the contract address to the top for easy access.
+const CONTRACT_ADDRESS = "0x58822827319Cee7fD30817Ca5BF5Cd0a09209070";
+
 
 export default function App() {
   // just a state variable we use to store our user's public wallet,
@@ -31,6 +37,10 @@ export default function App() {
       const account = accounts[0];
       console.log("Found an authorized account:", account);
       setCurrentAccount(account);
+
+      // Setup listener! This is for the case where a user comes to our site 
+      // and ALREADY their wallet connected + authorized.
+      setupEventListener();
     } else {
       console.log("No authorized account found");
     }
@@ -42,7 +52,7 @@ export default function App() {
       const { ethereum } = window;
 
       if (!ethereum) {
-        console.log("Get MetaMask!");
+        alert("Get MetaMask!");
         return;
       } else {
         // fancy method to request access to account.
@@ -53,24 +63,93 @@ export default function App() {
         // boom! this should print out public address once we authorized metamask
         console.log("Connected: ", accounts[0]);
         setCurrentAccount(accounts[0]);
+
+        // Setup listener! This is for the case where a user comes to our site 
+        // and connected their wallet for the first time.
+        setupEventListener();
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  // Render Methods
-  const renderNotConnectedContainer = () => (
-    <button className="cta-button connect-wallet-button">
-      Connect to Wallet
-    </button>
-  );
+
+  // Setup our listener. 
+  const setupEventListener = async () => {
+    // Most of this looks the same as our function askContractToMintNft
+    try {
+
+      const {ethereum} = window;
+
+      if (ethereum) {
+        // Same stuff again 
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+
+        // This is the magic sauce. 
+        // this will essentially "Capture" our event when our contract throw it.
+        // If you're familier with webhooks, It's very similar to that! 
+        connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
+          console.log(from, tokenId.toNumber());
+          alert(`Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
+        });
+
+        console.log("Setup event listener!");
+
+      } else {
+        console.log("Ethereum object doesn't exist!");
+      }
+
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const askContractToMintNft = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+
+        console.log("Goging to pop wallet now to pay gas ..."); 
+        let nftTxn = await connectedContract.makeAnEpicNFT();
+
+        console.log("Mining...... Please wait.");
+        await nftTxn.wait();
+
+        console.log(`Mined. seee transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+      } else {
+        console.log("Ethereum object doesn't exist!");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
 
   // this runs our function when pags load.
   useEffect(() => {
     checkIfWalletIsConnected();
-    connectWallet();
   }, []);
+
+
+  // Render Methods
+  const renderNotConnectedContainer = () => (
+    <button onClick = {connectWallet} className="cta-button connect-wallet-button">
+      Connect to Wallet
+    </button>
+  );
+
+  const renderMintUI = () => (
+    <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
+    Mint NFT
+    </button>
+  )
 
   return (
     <div className="container">
@@ -86,13 +165,7 @@ export default function App() {
           Each unique. Each beautiful. Discover your NFT today.
         </p>
 
-        {currentAccount == "" ? (
-          renderNotConnectedContainer()
-        ) : (
-          <button onClick={null} className="cta-button connect-wallet-button">
-            Mint NFT
-          </button>
-        )}
+        { currentAccount === "" ?  renderNotConnectedContainer() : renderMintUI() }
       </main>
 
       <div className="footer-container">
