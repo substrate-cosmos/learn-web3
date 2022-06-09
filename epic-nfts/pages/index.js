@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React from "react";
+import React, { useEffect } from "react";
 
 // Constants
 const TWITTER_HANDLE = "_buildspace";
@@ -7,13 +7,31 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
-export default function Home() {
+export default function App() {
+
+  const checkIfWalletIsConnected = () => {
+    // fist make sure we have access to window.ethereum
+    const { ethereum } = window;
+
+    if (!ethereum) {
+      console.log("Make sure you have matamask!");
+      return;
+    } else {
+      console.log("We have the ethereum object", ethereum);
+    }
+  }
+
   // Render Methods
   const renderNotConnectedContainer = () => (
     <button className="cta-button connect-wallet-button">
       Connect to Wallet
     </button>
   );
+
+  // this runs our function when pags load. 
+  useEffect(() => {
+    checkIfWalletIsConnected();
+  },[])
 
   return (
     <div className="container">
