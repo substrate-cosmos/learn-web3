@@ -1,22 +1,22 @@
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers"; 
+import { ethers } from "ethers";
 import myEpicNft from "./utils/MyEpicNFT.json";
 
 // Constants
-const TWITTER_HANDLE = "_buildspace";
+const TWITTER_HANDLE = "TheLongSnow";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
 
 // I moved the contract address to the top for easy access.
-const CONTRACT_ADDRESS = "0x58822827319Cee7fD30817Ca5BF5Cd0a09209070";
-
+const CONTRACT_ADDRESS = "0xec13A42E0FDe0E3F1c3C69065aE06b0143012A0C";
 
 export default function App() {
   // just a state variable we use to store our user's public wallet,
   // Don't forget to impot useState
   const [currentAccount, setCurrentAccount] = useState("");
+  const [TotalNFTsMintedSoFar, setTotalNFTsMintedSoFar] = useState(0);
 
   const checkIfWalletIsConnected = async () => {
     // fist make sure we have access to window.ethereum
@@ -29,6 +29,15 @@ export default function App() {
       console.log("We have the ethereum object", ethereum);
     }
 
+    let chainId = await ethereum.request({method: "eth_chainId"});
+    console.log("Connected to chain " + chainId);
+    
+    // String, hex code of the chainId of the Rinkebey test network
+    const rinkebyChianId = "0x4";
+    if (chainId !== rinkebyChianId) {
+      alert("You are not connected to the Rinkeby Test Network!");
+    }
+
     // check is we're authorized to access the user's wallet
     const accounts = await ethereum.request({ method: "eth_accounts" });
 
@@ -38,9 +47,10 @@ export default function App() {
       console.log("Found an authorized account:", account);
       setCurrentAccount(account);
 
-      // Setup listener! This is for the case where a user comes to our site 
+      // Setup listener! This is for the case where a user comes to our site
       // and ALREADY their wallet connected + authorized.
       setupEventListener();
+      getTotalNFTsMintedSoFar();
     } else {
       console.log("No authorized account found");
     }
@@ -64,9 +74,10 @@ export default function App() {
         console.log("Connected: ", accounts[0]);
         setCurrentAccount(accounts[0]);
 
-        // Setup listener! This is for the case where a user comes to our site 
+        // Setup listener! This is for the case where a user comes to our site
         // and connected their wallet for the first time.
         setupEventListener();
+        getTotalNFTsMintedSoFar();
       }
     } catch (err) {
       console.log(err);
@@ -74,38 +85,67 @@ export default function App() {
   };
 
 
-  // Setup our listener. 
+  const getTotalNFTsMintedSoFar = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+
+        // use contractABI
+        const connectedContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          myEpicNft.abi,
+          signer
+        );
+
+        let count = await connectedContract.getTotalNFTsMintedSoFar();
+        setTotalNFTsMintedSoFar(count.toNumber());
+        console.log(count.toNumber());
+        return count.toNumber();
+      } else {
+        console.log("Ethereum object does't exist!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Setup our listener.
   const setupEventListener = async () => {
     // Most of this looks the same as our function askContractToMintNft
     try {
-
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (ethereum) {
-        // Same stuff again 
+        // Same stuff again
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+        const connectedContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          myEpicNft.abi,
+          signer
+        );
 
-        // This is the magic sauce. 
+        // This is the magic sauce.
         // this will essentially "Capture" our event when our contract throw it.
-        // If you're familier with webhooks, It's very similar to that! 
+        // If you're familier with webhooks, It's very similar to that!
         connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
           console.log(from, tokenId.toNumber());
-          alert(`Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
+          alert(
+            `Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`
+          );
         });
 
         console.log("Setup event listener!");
-
       } else {
         console.log("Ethereum object doesn't exist!");
       }
-
-
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 
   const askContractToMintNft = async () => {
     try {
@@ -114,42 +154,53 @@ export default function App() {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+        const connectedContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          myEpicNft.abi,
+          signer
+        );
 
-        console.log("Goging to pop wallet now to pay gas ..."); 
+        console.log("Goging to pop wallet now to pay gas ...");
         let nftTxn = await connectedContract.makeAnEpicNFT();
 
         console.log("Mining...... Please wait.");
         await nftTxn.wait();
 
-        console.log(`Mined. seee transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+        console.log(
+          `Mined. seee transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
+        );
+        getTotalNFTsMintedSoFar();
       } else {
         console.log("Ethereum object doesn't exist!");
       }
     } catch (err) {
       console.log(err);
     }
-  }
-
+  };
 
   // this runs our function when pags load.
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
 
-
   // Render Methods
   const renderNotConnectedContainer = () => (
-    <button onClick = {connectWallet} className="cta-button connect-wallet-button">
+    <button
+      onClick={connectWallet}
+      className="cta-button connect-wallet-button"
+    >
       Connect to Wallet
     </button>
   );
 
   const renderMintUI = () => (
-    <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
-    Mint NFT
+    <button
+      onClick={askContractToMintNft}
+      className="cta-button connect-wallet-button"
+    >
+      Mint NFT
     </button>
-  )
+  );
 
   return (
     <div className="container">
@@ -165,7 +216,10 @@ export default function App() {
           Each unique. Each beautiful. Discover your NFT today.
         </p>
 
-        { currentAccount === "" ?  renderNotConnectedContainer() : renderMintUI() }
+        {currentAccount === "" ? renderNotConnectedContainer() : renderMintUI()}
+
+        <div> {TotalNFTsMintedSoFar} / 50 NFTs minted so far </div>
+
       </main>
 
       <div className="footer-container">
